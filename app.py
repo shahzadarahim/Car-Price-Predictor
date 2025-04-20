@@ -20,7 +20,7 @@ def predict():
     if request.method == 'POST':
         Brand = request.form['Brand']
         Model = request.form['Model']
-        Fuel = request.form['Fuel']
+        Fuel = request.form['Fuel_Type']
         Transmission = request.form['Transmission']
         Year = int(request.form['Year'])
         EngineSize = float(request.form['EngineSize'])
@@ -44,11 +44,12 @@ def predict():
         # Apply mean encoding for Brand and Model
         input_df['Brand_encoded'] = input_df['Brand'].map(Brand_Encoder)
         input_df['Model_encoded'] = input_df['Model'].map(Model_Encoder)
-        input_df['Brand_encoded'].fillna(input_df['Brand_encoded'].mean(), inplace=True)
-        input_df['Model_encoded'].fillna(input_df['Model_encoded'].mean(), inplace=True)
+        input_df['Brand_encoded'] = input_df['Brand_encoded'].fillna(input_df['Brand_encoded'].mean())
+        input_df['Model_encoded'] = input_df['Model_encoded'].fillna(input_df['Model_encoded'].mean())
         input_df.drop(['Brand', 'Model'], axis=1, inplace=True)
 
         # One Hot encode Fuel and Transmission
+        input_df.rename(columns={'Fuel': 'Fuel_Type'}, inplace=True)
         cat_columns = ['Transmission', 'Fuel']
         encoded_array = OneHot_Encoder.transform(input_df[cat_columns])
         encoded_df = pd.DataFrame(encoded_array, columns=OneHot_Encoder.get_feature_names_out(cat_columns))
