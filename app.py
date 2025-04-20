@@ -1,5 +1,5 @@
 import pickle
-from flask import Flask, jsonfiy, url_for, request, app, render_template
+from flask import Flask, jsonify, url_for, request, app, render_template
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
