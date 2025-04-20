@@ -50,7 +50,7 @@ def predict():
 
         # One Hot encode Fuel and Transmission
         input_df.rename(columns={'Fuel': 'Fuel_Type'}, inplace=True)
-        cat_columns = ['Transmission', 'Fuel']
+        cat_columns = ['Transmission', 'Fuel_Type']
         encoded_array = OneHot_Encoder.transform(input_df[cat_columns])
         encoded_df = pd.DataFrame(encoded_array, columns=OneHot_Encoder.get_feature_names_out(cat_columns))
         
@@ -65,7 +65,7 @@ def predict():
         if output < 0:
             return render_template('index.html', prediction_texts='Sorry you cannot sell this car')
         else:
-            return render_template('index_html', prediction_texts='Car is worth at: $ {}'.format(output))
+            return render_template('index.html', prediction_texts='Car is worth at: $ {}'.format(output))
     else:
         return render_template('index.html')
 
