@@ -15,7 +15,7 @@ OneHot_Encoder = pickle.load(open('./models/OneHot_Encoder.pkl', 'rb'))
 def Home():
     return render_template('index.html')
 
-@app.route('predict', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
         Brand = request.form['Brand']
