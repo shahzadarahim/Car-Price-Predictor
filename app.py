@@ -20,7 +20,7 @@ def predict():
     if request.method == 'POST':
         Brand = request.form['Brand']
         Model = request.form['Model']
-        Fuel = request.form['Fuel_Type']
+        Fuel = request.form['Fuel']
         Transmission = request.form['Transmission']
         Year = int(request.form['Year'])
         EngineSize = float(request.form['EngineSize'])
