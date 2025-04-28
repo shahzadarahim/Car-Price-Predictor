@@ -1,5 +1,5 @@
 import pickle
-from flask import Flask, jsonify, url_for, request, app, render_template
+from flask import Flask, request, render_template
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
@@ -15,59 +15,73 @@ OneHot_Encoder = pickle.load(open('./models/OneHot_Encoder.pkl', 'rb'))
 def Home():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
-        Brand = request.form['Brand']
-        Model = request.form['Model']
-        Fuel = request.form['Fuel_Type']
-        Transmission = request.form['Transmission']
-        Year = int(request.form['Year'])
-        EngineSize = float(request.form['EngineSize'])
-        Mileage = int(request.form['Mileage'])
-        Doors = int(request.form['Doors'])
-        OwnerCount = int(request.form['OwnerCount'])
+        try:
+            # Getting form inputs
+            Brand = request.form['Brand']
+            Model = request.form['Model']
+            Fuel = request.form['Fuel_Type']
+            Transmission = request.form['Transmission']
+            Year = int(request.form['Year'])
+            EngineSize = float(request.form['EngineSize'])
+            Mileage = int(request.form['Mileage'])
+            Doors = int(request.form['Doors'])
+            OwnerCount = int(request.form['OwnerCount'])
 
-        # Create a DataFrame for the input data
-        input_df = pd.DataFrame({
-            'Brand' : [Brand],
-            'Model' : [Model],
-            'Fuel_Type' : [Fuel],
-            'Transmission' : [Transmission],
-            'Year' : [Year],
-            'EngineSize' : [EngineSize],
-            'Mileage' : [Mileage],
-            'Doors' : [Doors],
-            'OwnerCount' : [OwnerCount]
-        })
+            # Create a DataFrame for the input data
+            input_df = pd.DataFrame({
+                'Brand' : [Brand],
+                'Model' : [Model],
+                'Fuel_Type' : [Fuel],
+                'Transmission' : [Transmission],
+                'Year' : [Year],
+                'EngineSize' : [EngineSize],
+                'Mileage' : [Mileage],
+                'Doors' : [Doors],
+                'OwnerCount' : [OwnerCount]
+            })
 
-        # Apply mean encoding for Brand and Model
-        input_df['Brand'] = input_df['Brand'].map(Brand_Encoder)
-        input_df['Model'] = input_df['Model'].map(Model_Encoder)
-        input_df['Brand'] = input_df['Brand'].fillna(input_df['Brand'].mean())
-        input_df['Model'] = input_df['Model'].fillna(input_df['Model'].mean())
-        # input_df.drop(['Brand', 'Model'], axis=1, inplace=True)
+            # Apply mean encoding for Brand and Model
+            input_df['Brand'] = input_df['Brand'].map(Brand_Encoder)
+            input_df['Model'] = input_df['Model'].map(Model_Encoder)
+            input_df['Brand'] = input_df['Brand'].fillna(input_df['Brand'].mean())
+            input_df['Model'] = input_df['Model'].fillna(input_df['Model'].mean())
+            # input_df.drop(['Brand', 'Model'], axis=1, inplace=True)
 
-        # One Hot encode Fuel and Transmission
-        # input_df.rename(columns={'Fuel': 'Fuel_Type'}, inplace=True)
-        cat_columns = ['Transmission', 'Fuel_Type']
-        encoded_array = OneHot_Encoder.transform(input_df[cat_columns])
-        encoded_df = pd.DataFrame(encoded_array, 
-                                  columns = OneHot_Encoder.get_feature_names_out(cat_columns),
-                                  index = input_df.index)
+            # One Hot encode Fuel and Transmission
+            # input_df.rename(columns={'Fuel': 'Fuel_Type'}, inplace=True)
+            cat_columns = ['Transmission', 'Fuel_Type']
+            encoded_array = OneHot_Encoder.transform(input_df[cat_columns])
+            encoded_df = pd.DataFrame(encoded_array, 
+                                    columns = OneHot_Encoder.get_feature_names_out(cat_columns),
+                                    index = input_df.index)
         
-        # Merge encoded columns with input data
-        input_df_encoded = input_df.drop(columns=cat_columns)
-        input_data = pd.concat([input_df_encoded, encoded_df], axis=1)
+            # Merge encoded columns with input data
+            input_df_encoded = input_df.drop(columns=cat_columns)
+            input_data = pd.concat([input_df_encoded, encoded_df], axis=1)
 
-        # Make prediction
-        prediction = model.predict(input_data)
-        output = round(prediction[0], 2)
+            # Make prediction
+            prediction = model.predict(input_data)
+            output = round(prediction[0], 2)
 
-        if output < 0:
-            return render_template('index.html', prediction_texts='Sorry you cannot sell this car')
-        else:
-            return render_template('index.html', prediction_texts='Car is worth at: $ {}'.format(output))
+            if output < 0:
+                return render_template('index.html', prediction_text='Sorry you cannot sell this car')
+            else:
+                return render_template('index.html', prediction_text='Car is worth at: $ {}'.format(output))
+        except KeyError as e:
+            error_message = f"Error with column: {e}. Please make sure all fields are filled correctly."
+            return render_template('index.html', prediction_text=error_message)
+        
+        except ValueError as e:
+            error_message = f"Invalid data: {e}. Please check the input values."
+            return render_template('index.html', prediction_text=error_message)
+        
+        except Exception as e:
+            error_message = f"An unexpected error occured: {str(e)}"
+            return render_template('index_html', prediction_text=error_message)
+
     else:
         return render_template('index.html')
 
