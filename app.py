@@ -80,7 +80,7 @@ def predict():
         
         except Exception as e:
             error_message = f"An unexpected error occured: {str(e)}"
-            return render_template('index_html', prediction_text=error_message)
+            return render_template('index.html', prediction_text=error_message)
 
     else:
         return render_template('index.html')
