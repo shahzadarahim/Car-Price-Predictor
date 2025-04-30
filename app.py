@@ -25,10 +25,10 @@ def predict():
             Fuel = request.form['Fuel_Type']
             Transmission = request.form['Transmission']
             Year = int(request.form['Year'])
-            EngineSize = float(request.form['EngineSize'])
+            Engine_Size = float(request.form['Engine_Size'])
             Mileage = int(request.form['Mileage'])
             Doors = int(request.form['Doors'])
-            OwnerCount = int(request.form['OwnerCount'])
+            Owner_Count = int(request.form['Owner_Count'])
 
             # Create a DataFrame for the input data
             input_df = pd.DataFrame({
@@ -37,10 +37,10 @@ def predict():
                 'Fuel_Type' : [Fuel],
                 'Transmission' : [Transmission],
                 'Year' : [Year],
-                'EngineSize' : [EngineSize],
+                'Engine_Size' : [Engine_Size],
                 'Mileage' : [Mileage],
                 'Doors' : [Doors],
-                'OwnerCount' : [OwnerCount]
+                'Owner_Count' : [Owner_Count]
             })
 
             # Apply mean encoding for Brand and Model
@@ -64,12 +64,12 @@ def predict():
 
             # Make prediction
             prediction = model.predict(input_data)
-            output = round(prediction[0], 2)
+            output = 80*(round(prediction[0]))
 
             if output < 0:
                 return render_template('index.html', prediction_text='Sorry you cannot sell this car')
             else:
-                return render_template('index.html', prediction_text='Car is worth at: $ {}'.format(output))
+                return render_template('index.html', prediction_text='Car is worth at: ₹ {}'.format(output))
         except KeyError as e:
             error_message = f"Error with column: {e}. Please make sure all fields are filled correctly."
             return render_template('index.html', prediction_text=error_message)
